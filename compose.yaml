@@ -1,0 +1,34 @@
+services:
+  claude:
+    build:
+      context: .
+      args:
+        # These default to 1000, but can be overridden in .env
+        USER_ID: ${USER_ID:-1000}
+        GROUP_ID: ${GROUP_ID:-1000}
+    image: custom-claude-code
+    # Interactive mode is required for CLI tools
+    stdin_open: true
+    tty: true
+    volumes:
+      # 1. Mount the project you want to work on.
+      # We map it to /app so Claude sees it as the current directory.
+      - ${TARGET_PROJECT}:/app
+
+      # 2. Persist Claude's authentication and memory (chats)
+      - claude_config:/home/claude/.claude
+
+      # 3. Persist NPM cache so it doesn't re-download everything constantly
+      - npm_cache:/home/claude/.npm
+
+      # 4. Optional: Mount your gitconfig so Claude can commit as you
+      - ~/.gitconfig:/home/claude/.gitconfig:ro
+
+    environment:
+      # If you want to skip login and use a key directly:
+      # - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+      - TERM=xterm-256color
+
+volumes:
+  claude_config:
+  npm_cache:

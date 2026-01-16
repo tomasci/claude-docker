@@ -1,0 +1,17 @@
+#!/bin/bash
+
+# 1. Get the absolute path of the folder containing this script
+# This ensures it finds compose.yaml even if you run it from a different folder
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+# 2. Get the folder you are currently standing in (your project)
+CURRENT_DIR=$(pwd)
+
+# 3. Export variables for Docker
+export USER_ID=$(id -u)
+export GROUP_ID=$(id -g)
+export TARGET_PROJECT="$CURRENT_DIR"
+
+# 4. Run Docker Compose
+# We point specifically to the compose file in the script's directory
+docker compose -f "$SCRIPT_DIR/compose.yaml" run --rm claude "$@"
