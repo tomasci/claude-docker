@@ -18,10 +18,13 @@ services:
       # 2. Persist Claude's authentication and memory (chats)
       - claude_config:/home/claude/.claude
 
-      # 3. Persist NPM cache so it doesn't re-download everything constantly
+      # 3. Mount plans directory to project so they sync with host
+      - ${TARGET_PROJECT}/.claude/plans:/home/claude/.claude/plans
+
+      # 4. Persist NPM cache so it doesn't re-download everything constantly
       - npm_cache:/home/claude/.npm
 
-      # 4. Optional: Mount your gitconfig so Claude can commit as you
+      # 5. Optional: Mount your gitconfig so Claude can commit as you
       - ~/.gitconfig:/home/claude/.gitconfig:ro
 
     environment:
