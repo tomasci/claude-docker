@@ -1,4 +1,4 @@
-# Use a full Node image
+# Use a full Node image (kept for dev purposes)
 FROM node:24-bookworm
 
 # Install common development tools
@@ -16,8 +16,8 @@ RUN apt-get update && apt-get install -y \
 	build-essential \
 	&& rm -rf /var/lib/apt/lists/*
 
-# Install Claude Code globally
-RUN npm install -g @anthropic-ai/claude-code
+# Install Bun system-wide
+RUN curl -fsSL https://bun.sh/install | BUN_INSTALL=/usr/local bash
 
 # Setup User Arguments
 ARG USER_ID=1000
@@ -38,11 +38,17 @@ RUN mkdir -p /app /home/${USER_NAME}/.claude /home/${USER_NAME}/.npm && \
 	chown -R ${USER_ID}:${GROUP_ID} /app /home/${USER_NAME}/.claude /home/${USER_NAME}/.npm
 
 USER ${USER_NAME}
+
+# Install Claude Code using native installer (installs to ~/.local/bin/claude)
+RUN curl -fsSL https://claude.ai/install.sh | bash
+
 WORKDIR /app
 
 # Set environment variables
 ENV CLAUDE_CONFIG_DIR=/home/${USER_NAME}/.claude
 ENV NPM_CONFIG_PREFIX=/home/${USER_NAME}/.npm-global
-ENV PATH=$PATH:/home/${USER_NAME}/.npm-global/bin
+ENV PATH=$PATH:/home/${USER_NAME}/.npm-global/bin:/home/${USER_NAME}/.local/bin
+# Disable auto-updater — update claude by rebuilding the image
+ENV DISABLE_AUTOUPDATER=1
 
 ENTRYPOINT ["claude"]
